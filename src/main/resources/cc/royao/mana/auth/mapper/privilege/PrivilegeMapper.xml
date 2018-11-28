@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cc.royao.mana.auth.mapper.privilege.PrivilegeMapper">
+
+
+    <resultMap id="rmPrivilege" type="cc.royao.mana.auth.model.Privilege">
+        <result property="privilegeId" column="privilege_id"/>
+
+        <result property="menuId" column="menu_id"/>
+        <result property="privilegeName" column="privilege_name"/>
+        <result property="privilegeStatus" column="privilege_status"/>
+        <result property="privilegeType" column="privilege_type"/>
+        <result property="privilegeUrl" column="privilege_url"/>
+        <result property="privilegeCt" column="privilege_ct"/>
+        <result property="privilegeRemark" column="privilege_remark"/>
+        <result property="privilegeKey" column="privilege_key"/>
+    </resultMap>
+
+
+    <insert id="addPrivilege" useGeneratedKeys="true"  keyProperty="privilegeId">
+        <![CDATA[
+        INSERT INTO tb_sys_privilege (privilege_id ,menu_id ,privilege_name ,privilege_status ,privilege_type,privilege_url , privilege_ct,privilege_remark,privilege_key)
+        values (#{privilegeId},#{menuId},#{privilegeName},#{privilegeStatus},#{privilegeType},#{privilegeUrl} , #{privilegeCt} ,#{privilegeRemark} , #{privilegeKey})
+
+        ]]>
+
+
+    </insert>
+
+    <select id = "getAllPrivilege" resultMap="rmPrivilege">
+        select * from tb_sys_privilege
+    </select>
+
+    <select id = "getAllPrivilegeWithPageCondition" resultMap="rmPrivilege">
+        select * from tb_sys_privilege limit #{begin} , #{end}
+    </select>
+
+
+    <select id = "queryAllCount" resultType="java.lang.Long">
+        select count(*) from tb_sys_privilege
+    </select>
+
+    <select id = "queryById"  resultMap="rmPrivilege">
+        select * from tb_sys_privilege   where privilege_id = #{privilegeId}
+    </select>
+
+
+
+    <update id="updatePrivilege" parameterType="cc.royao.mana.auth.model.Privilege">
+        update tb_sys_privilege
+
+        <set>
+            <if test="privilegeStatus != null">
+                privilege_status = #{privilegeStatus},
+            </if>
+            <if test="privilegeName != null">
+                privilege_name = #{privilegeName},
+            </if>
+            <if test="privilegeType != null">
+                privilege_type = #{privilegeType},
+            </if>
+
+            <if test="privilegeUrl != null">
+                privilege_url = #{privilegeUrl},
+            </if>
+            <if test="privilegeRemark != null">
+                privilege_remark = #{privilegeRemark},
+            </if>
+            <if test="menuId != null">
+                menu_id = #{menuId}
+            </if>
+        </set>
+
+        where privilege_id = #{privilegeId}
+    </update>
+
+    <update id="deletePrivilege">
+          update tb_sys_privilege  set privilege_status = 'N' where privilege_id = #{value}
+    </update>
+
+
+    <select id = "findByRoleId" resultMap="rmPrivilege">
+      select a.* from tb_sys_privilege a left outer join tb_sys_role_privilege b on a.privilege_id = b.privilege_id
+      where  b.role_id =#{roleId}
+    </select>
+
+</mapper>

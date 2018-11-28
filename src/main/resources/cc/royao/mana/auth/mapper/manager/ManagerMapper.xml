@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cc.royao.mana.auth.mapper.manager.ManagerMapper">
+    <resultMap id="rmManager" type="cc.royao.mana.auth.model.Manager">
+        <result property="mamangerId" column="manager_id"/>
+        <result property="managerName" column="manager_name"/>
+        <result property="managerStatue" column="manager_statue"/>
+        <result property="managerCt" column="manager_ct"/>
+        <result property="managerRoleName" column="manager_role_name"/>
+        <result property="managerRemark" column="manager_ramark"/>
+
+        <result property="managerPhone" column="manager_phone"/>
+        <result property="managerQQ" column="manager_qq"/>
+        <result property="managerMail" column="manager_mail"/>
+        <result property="managerLoginName" column="manager_login_name"/>
+
+        <result property="managerLoginPwd" column="manager_login_pwd"/>
+
+    </resultMap>
+
+
+    <insert id="addManager"   useGeneratedKeys="true" keyProperty="mamangerId">
+
+          insert into tb_sys_manager (
+          manager_id,
+          manager_name,
+          manager_statue,
+          manager_ct,
+          manager_role_name,
+          manager_ramark,
+          manager_phone,
+          manager_qq,
+          manager_mail,
+          manager_login_name,
+          manager_login_pwd
+        )
+        values (#{mamangerId},#{managerName},#{managerStatue},#{managerCt}
+        ,#{managerRoleName},#{managerRemark},#{managerPhone}
+        ,#{managerQQ},#{managerMail},#{managerLoginName},#{managerLoginPwd}
+        )
+
+    </insert>
+
+
+    <insert id="addManagerRole" useGeneratedKeys="true"  keyProperty="id">
+        <![CDATA[
+        INSERT INTO tb_sys_manager_role (id ,manager_id ,role_id)
+        values (#{id},#{managerId},#{roleId})
+        ]]>
+    </insert>
+
+
+    <delete id="deleteManagerRole" >
+
+        delete from  tb_sys_manager_role where manager_id = #{value}
+
+    </delete>
+
+
+
+    <insert id="insertLog"   useGeneratedKeys="true" keyProperty="id">
+        insert into tb_sys_manager_logs (
+          id,
+          manager_id,
+          managerlog_ct,
+          managerlog_ip
+        )
+        values (#{id},#{managerId},#{managerLogCt},#{managerLogIp})
+
+    </insert>
+
+
+    <update id="updateManager">
+
+
+        update tb_sys_manager
+
+        <set>
+			<if test="managerName != null">
+                manager_name = #{managerName},
+            </if>
+            <if test="managerStatue != null">
+                manager_statue = #{managerStatue},
+            </if>
+            <if test="managerRoleName != null">
+                manager_role_name = #{managerRoleName},
+            </if>
+            <if test="managerLoginName != null">
+                manager_login_name = #{managerLoginName},
+            </if>
+            <if test="managerLoginPwd != null">
+                manager_login_pwd = #{managerLoginPwd},
+            </if>
+            <if test="managerQQ != null">
+                manager_qq = #{managerQQ},
+            </if>
+            <if test="managerMail != null">
+                manager_mail = #{managerMail},
+            </if>
+            <if test="managerPhone != null">
+                manager_phone = #{managerPhone},
+            </if>
+            <if test="managerRemark != null">
+                manager_ramark = #{managerRemark},
+            </if>
+        </set>
+        where manager_id = #{mamangerId}
+    </update>
+
+
+    <resultMap type="cc.royao.mana.auth.model.Manager" id="rmManagerRelation" extends="rmManager">
+        <association property="role" column="manager_id" select="cc.royao.mana.auth.mapper.role.RoleMapper.queryManagerRole"></association>
+    </resultMap>
+
+    <select id = "managerLogin" resultMap="rmManagerRelation">
+        select * from tb_sys_manager where manager_login_name = #{0} and manager_login_pwd = #{1}
+    </select>
+
+
+    <select id = "getAllManageWithPageCondition" resultMap="rmManagerRelation">
+        select * from tb_sys_manager limit #{begin} , #{end}
+    </select>
+
+
+    <select id = "queryAllCount" resultType="java.lang.Long">
+        select count(*) from tb_sys_manager
+    </select>
+
+    <select id = "queryById" resultMap="rmManagerRelation">
+        select *  from tb_sys_manager where manager_id = #{value}
+    </select>
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cc.royao.mana.auth.mapper.role.RoleMapper">
+
+    <resultMap id="rmRole" type="cc.royao.mana.auth.model.Role">
+        <result property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="roleCt" column="role_ct"/>
+        <result property="roleAdmin" column="role_admin"/>
+        <result property="roleKeyword" column="role_keyword"/>
+        <result property="roleStatus" column="role_status"/>
+
+    </resultMap>
+
+
+    <resultMap type="cc.royao.mana.auth.model.Role" id="rmRoleRelation" extends="rmRole">
+        <association property="privileges" column="role_id" select="cc.royao.mana.auth.mapper.privilege.PrivilegeMapper.findByRoleId"></association>
+    </resultMap>
+
+
+
+    <insert id="addRole" useGeneratedKeys="true"  keyProperty="roleId">
+        <![CDATA[
+        INSERT INTO tb_sys_role (role_id ,role_name ,role_ct ,role_admin ,role_keyword,role_status)
+        values (#{roleId},#{roleName},#{roleCt},#{roleAdmin},#{roleKeyword},#{roleStatus})
+
+        ]]>
+
+
+    </insert>
+
+
+    <insert id="addRolePrivilege" useGeneratedKeys="true"  keyProperty="id">
+        <![CDATA[
+        INSERT INTO tb_sys_role_privilege (id ,role_id ,privilege_id)
+        values (#{id},#{roleId},#{privilegeId})
+        ]]>
+    </insert>
+
+    <delete id="deleteRolePrivilege">
+
+        delete from tb_sys_role_privilege where role_id = #{value}
+
+    </delete>
+
+    <select id = "queryById" resultMap="rmRoleRelation">
+        select * from tb_sys_role where  role_id = #{value}
+    </select>
+
+    <select id = "getAllRole" resultMap="rmRoleRelation">
+          select * from tb_sys_role
+    </select>
+
+    <select id = "getAllRoleWithPageCondition" resultMap="rmRoleRelation">
+        select * from tb_sys_role limit #{begin} , #{end}
+    </select>
+
+
+    <select id = "queryAllCount" resultType="java.lang.Long">
+        select count(*) from tb_sys_role
+    </select>
+
+
+    <update id="updateRole" parameterType="cc.royao.mana.auth.model.Role">
+        update tb_sys_role
+
+        <set>
+			<if test="roleStatus != null">
+				role_status = #{roleStatus},
+			</if>
+            <if test="roleName != null">
+                role_name = #{roleName},
+            </if>
+            <if test="roleKeyword != null">
+                role_keyword = #{roleKeyword},
+            </if>
+            <if test="roleAdmin != null">
+                role_admin = #{roleAdmin},
+            </if>
+        </set>
+
+        where role_id = #{roleId}
+    </update>
+
+    <update id="deleteRole">
+        update tb_sys_role  set role_status = 'N'  where role_id = #{roleId}
+    </update>
+
+
+    <select id = "queryManagerRole" resultMap="rmRoleRelation">
+        select b.* from tb_sys_manager_role a left outer join tb_sys_role b on a.role_id = b.role_id where a.manager_id = #{managerId}
+    </select>
+
+</mapper>

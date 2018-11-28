@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cc.royao.mana.auth.mapper.menu.MenuMapper">
+
+
+  <resultMap id="rmMenu" type="cc.royao.mana.auth.model.Menu">
+    <result property="menuId" column="menu_id"/>
+    <result property="modelId" column="model_id"/>
+    <result property="menuName" column="menu_name"/>
+    <result property="menuParent" column="menu_parent"/>
+    <result property="menuLevel" column="menu_level"/>
+    <result property="menuIcon" column="menu_icon"/>
+    <result property="menuDisplay" column="menu_display"/>
+    <result property="menuUrl" column="menu_url"/>
+    <result property="menuPraentName" column="menu_parent_name"/>
+
+
+    <collection column="menu_id" property="childMenu"
+      select="cc.royao.mana.auth.mapper.menu.MenuMapper.findChildMenu">
+    </collection>
+
+  </resultMap>
+
+
+  <insert id="addMenu" useGeneratedKeys="true" keyProperty="menuId">
+        <![CDATA[
+
+        INSERT INTO tb_sys_menu (menu_id ,model_id ,menu_name ,menu_parent ,menu_level,menu_icon ,menu_display ,menu_url)
+        values (#{menuId},#{modelId},#{menuName},#{menuParent},#{menuLevel},#{menuIcon},#{menuDisplay},#{menuUrl})
+
+
+    ]]>
+
+
+    </insert>
+
+
+  <resultMap id="rmMenuRelation" extends="rmMenu" type="cc.royao.mana.auth.model.Menu">
+    <association property="childMenu" column="menu_id"
+      select="cc.royao.mana.auth.mapper.menu.MenuMapper.findChildMenu"></association>
+  </resultMap>
+
+  <select id="getTopMenu" resultMap="rmMenuRelation">
+        select * from tb_sys_menu where menu_parent = -1
+    </select>
+  <select id="getAllMenu" resultMap="rmMenuRelation">
+        select * from tb_sys_menu 
+    </select>
+
+
+  <select id="getAllMenuWithPageCondition" resultMap="rmMenuRelation">
+
+      select a.* ,if( ISNULL(b.menu_name),'',b.menu_name ) as menuPraentName  from tb_sys_menu a left outer join tb_sys_menu b on a.menu_parent = b.menu_id limit #{begin} , #{end}
+
+    </select>
+
+  <select id="queryCount" resultType="java.lang.Long">
+
+        select count(*) from tb_sys_menu
+
+    </select>
+
+  <select id="findChildMenu" resultMap="rmMenuRelation">
+        select * from tb_sys_menu where menu_parent = #{menuId}
+    </select>
+
+
+  <select id="queryById" resultMap="rmMenuRelation">
+        select * from tb_sys_menu where menu_id = #{menuId}
+    </select>
+
+
+  <update id="updateMenu" parameterType="cc.royao.mana.auth.model.Menu">
+    update tb_sys_menu
+
+    <set>
+      <if test=" menuName != null">
+        menu_name = #{menuName},
+      </if>
+      <if test="menuParent != null">
+        menu_parent = #{menuParent},
+      </if>
+      <if test="menuUrl != null">
+        menu_url = #{menuUrl},
+      </if>
+
+      <if test="menuLevel != null">
+        menu_level = #{menuLevel},
+      </if>
+
+      <if test="menuDisplay != null">
+        menu_display = #{menuDisplay},
+      </if>
+
+
+    </set>
+
+    where menu_id = #{menuId}
+  </update>
+
+  <update id="deleteMenu">
+            delete from  tb_sys_menu   where menu_id = #{menuId} or menu_parent = #{menuId}
+    </update>
+
+  <select id="getMaxSortByParentId" resultType="long">
+        select max(menu_id) from tb_sys_menu where menu_parent = #{parentId}
+    </select>
+
+  <!-- 得到上一个同级菜单 -->
+  <select id="getPrevious" resultMap="rmMenu">
+        <![CDATA[
+
+        	 select * from tb_sys_menu where menu_parent = #{menuParent} and menu_id < #{menuSort} order by menu_id desc limit 0,1
+
+    ]]>
+    </select>
+  <!-- 得到下一个同级菜单 -->
+  <select id="getNext" resultMap="rmMenu">
+        <![CDATA[
+
+        	 select * from tb_sys_menu where menu_parent = #{menuParent} and menu_id > #{menuSort} order by menu_sort limit 0,1
+
+    ]]>
+    </select>
+  <update id="updateSort">
+		update tb_sys_menu set menu_sort = #{menuSort} where menu_id = #{menuId}
+	</update>
+</mapper>

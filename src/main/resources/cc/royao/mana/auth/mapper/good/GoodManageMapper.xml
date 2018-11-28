@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cc.royao.mana.auth.mapper.good.GoodManageMapper">
+    <resultMap id="rmGoodTmp" type="cc.royao.mana.model.GoodTmp">
+        <result property="goodTmpId" column="good_tmp_id"/>
+        <result property="goodTmpName" column="good_tmp_name"/>
+        <result property="goodTmpCt" column="good_tmp_ct"/>
+        <result property="goodTmpContent" column="good_tmp_content" typeHandler="cc.royao.common.ConvertBlobTypeHandler"/>
+        <result property="goodTmpCm" column="good_tmp_cm"/>
+        <result property="goodTmpType" column="good_tmp_type"/>
+
+
+
+    </resultMap>
+
+
+    <insert id="add"   useGeneratedKeys="true" keyProperty="goodTmpId">
+
+          insert into tb_sys_good_tmp (
+          good_tmp_id,
+          good_tmp_name,
+          good_tmp_ct,
+          good_tmp_content,
+          good_tmp_cm,
+          good_tmp_type
+        )
+        values (#{goodTmpId},#{goodTmpName},#{goodTmpCt},#{goodTmpContent}
+        ,#{goodTmpCm},#{goodTmpType}
+        )
+
+    </insert>
+
+
+	<update id="updateGoodTmp">
+        <![CDATA[
+        UPDATE tb_sys_good_tmp SET
+	        good_tmp_name =#{goodTmpName},good_tmp_content=#{goodTmpContent}
+        WHERE 
+	       	good_tmp_id = #{goodTmpId}
+    ]]>
+    </update>
+
+
+
+
+    <select id = "queryGoodTmpByType" resultMap="rmGoodTmp">
+        select * from tb_sys_good_tmp where good_tmp_type = #{0}
+    </select>
+
+    <select id = "choseGoodTmpContent" resultMap="rmGoodTmp">
+        select good_tmp_content from tb_sys_good_tmp where good_tmp_id = #{0}
+    </select>
+
+
+
+
+
+</mapper>
